@@ -7,7 +7,9 @@ public class Main {
     boolean colocar = false;
 
     public static void main(String[] args) {
-        Mavenproject1 m = new Mavenproject1();
+        ///////////////////////////////////////////////////////////
+        /// Creo todo
+        Main m = new Main();
         String[][] tablero = new String[10][100];
 
         for (int i = 0; i < tablero.length; i++) {
@@ -17,6 +19,8 @@ public class Main {
         }
         int tick = 0;
         boolean dead = true;
+        ///
+        ////////////////////////////////////////////////////////////
         while (tick < 1000 && dead) {
             tick++;
             if (tick <= 1) {
