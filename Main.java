@@ -95,7 +95,7 @@ public class Main {
                 switch (direccion) {
                     case 0: // Derecha
                         for (int i = 0; i < tablero.length; i++) {
-                            for (int j = 0; j < tablero[i].length; j++) {
+                            for (int j = tablero[i].length - 1; j >= 0; j--) {
                                 if (tablero[i][j].equals(m.verde)) {
                                     tablero[i][j] = m.azul;
                                     if (j + 1 < tablero[i].length) {
@@ -108,7 +108,7 @@ public class Main {
                         }
                         break;
                     case 1: // Abajo
-                        for (int i = 0; i < tablero.length; i++) {
+                        for (int i = tablero.length - 1; i >= 0; i--) {
                             for (int j = 0; j < tablero[i].length; j++) {
                                 if (tablero[i][j].equals(m.verde)) {
                                     tablero[i][j] = m.azul;
