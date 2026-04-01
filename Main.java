@@ -1,4 +1,6 @@
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Main {
 
     String azul = "\u001B[44m \u001B[0m";
@@ -10,8 +12,10 @@ public class Main {
     public static void main(String[] args) {
         ///////////////////////////////////////////////////////////
         /// Creo todo
+        int i1 = 20; // Filas
+        int j1 = 40; // Columnas
         Main m = new Main();
-        String[][] tablero = new String[20][100];
+        String[][] tablero = new String[i1][j1];
 
         for (int i = 0; i < tablero.length; i++) {
             for (int j = 0; j < tablero[i].length; j++) {
@@ -20,39 +24,50 @@ public class Main {
         }
         int tick = 0;
         boolean dead = true;
-        int direccion = 0; // 0 = derecha, 1 = abajo, 2 = izquierda, 3 = arriba
         int comida = 0;
         int comidacomida = 0;
         int cuerpo = 0;
         ///
         ////////////////////////////////////////////////////////////
-        while (tick < 1000 && dead) {
+        /// Coloco el terminal en modo raw para que no haga falta pulsar enter para leer la entrada, esto es para linux, en windows no es posilbe
+        try {
+            Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "stty raw -echo < /dev/tty"}).waitFor();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        AtomicInteger direccion = new AtomicInteger(0);
 
-            // Leo la dirección
-            int c = 0;
-            try {
-                c = System.in.read();
-            } catch (java.io.IOException e) {
-                e.printStackTrace();
-            }
-            if (dead) {
-                System.out.println("Usa las teclas WASD para mover el snake");
-
-                switch (c) {
-                    case 'd':
-                        direccion = 0;
-                        break;
-                    case 's':
-                        direccion = 1;
-                        break;
-                    case 'a':
-                        direccion = 2;
-                        break;
-                    case 'w':
-                        direccion = 3;
-                        break;
+        // El hilo de input:
+        Thread inputThread = new Thread(() -> {
+            while (true) {
+                try {
+                    int c = System.in.read();
+                    while (System.in.available() > 0) {
+                        System.in.read();
+                    }
+                    switch (c) {
+                        case 'd':
+                            direccion.set(0);
+                            break;
+                        case 's':
+                            direccion.set(1);
+                            break;
+                        case 'a':
+                            direccion.set(2);
+                            break;
+                        case 'w':
+                            direccion.set(3);
+                            break;
+                    }
+                } catch (java.io.IOException e) {
+                    e.printStackTrace();
                 }
             }
+        });
+        inputThread.setDaemon(true);
+        inputThread.start();
+
+        while (tick < 1000 && dead) {
 
             // Limpio la consola
             System.out.print("\033[H\033[2J");
@@ -79,13 +94,13 @@ public class Main {
             }
 
             // Creo la comida
-            int n1 = (int) (Math.random() * 20);
-            int n2 = (int) (Math.random() * 100);
+            int n1 = (int) (Math.random() * i1);
+            int n2 = (int) (Math.random() * j1);
 
             // Si la comida cae en el snake, se vuelve a generar
             while (tablero[n1][n2].equals(m.verde) || tablero[n1][n2].equals(m.amarillo)) {
-                n1 = (int) (Math.random() * 20);
-                n2 = (int) (Math.random() * 100);
+                n1 = (int) (Math.random() * i1);
+                n2 = (int) (Math.random() * j1);
             }
 
             // Coloco la comida
@@ -105,7 +120,7 @@ public class Main {
             }
 
             // Aplico la direccion de el snake
-            switch (direccion) {
+            switch (direccion.get()) {
                 case 0: // Derecha
                     for (int i = 0; i < tablero.length; i++) {
                         for (int j = tablero[i].length - 1; j >= 0; j--) {
@@ -113,10 +128,10 @@ public class Main {
                                 tablero[i][j] = m.azul;
                                 if (tablero[i][j + 1].equals(m.rojo)) { // Si la comida está a la derecha del snake se come la comida
                                     comidacomida++;
-                                    if (comidacomida == 1) {
-                                        comida = 0;
-                                        cuerpo++;
-                                    }
+
+                                    comida = 0;
+                                    cuerpo++;
+
                                 }
                                 if (j + 1 < tablero[i].length) {
                                     tablero[i][j + 1] = m.verde;
@@ -132,12 +147,12 @@ public class Main {
                         for (int j = 0; j < tablero[i].length; j++) {
                             if (tablero[i][j].equals(m.verde)) {
                                 tablero[i][j] = m.azul;
-                                if (tablero[i][i + 1].equals(m.rojo)) { // Si la comida está abajo del snake se come la comida
+                                if (tablero[i + 1][j].equals(m.rojo)) { // Si la comida está abajo del snake se come la comida
                                     comidacomida++;
-                                    if (comidacomida == 1) {
-                                        comida = 0;
-                                        cuerpo++;
-                                    }
+
+                                    comida = 0;
+                                    cuerpo++;
+
                                 }
                                 if (i + 1 < tablero.length - 1) {
                                     tablero[i + 1][j] = m.verde;
@@ -155,10 +170,10 @@ public class Main {
                                 tablero[i][j] = m.azul;
                                 if (tablero[i][j - 1].equals(m.rojo)) { // Si la comida está a la izquierda del snake se come la comida
                                     comidacomida++;
-                                    if (comidacomida == 1) {
-                                        comida = 0;
-                                        cuerpo++;
-                                    }
+
+                                    comida = 0;
+                                    cuerpo++;
+
                                 }
                                 if (j - 1 >= 0) {
                                     tablero[i][j - 1] = m.verde;
@@ -174,12 +189,12 @@ public class Main {
                         for (int j = 0; j < tablero[i].length; j++) {
                             if (tablero[i][j].equals(m.verde)) {
                                 tablero[i][j] = m.azul;
-                                if (tablero[i][i - 1].equals(m.rojo)) { // Si la comida está arriba del snake se come la comida
+                                if (tablero[i - 1][j].equals(m.rojo)) { // Si la comida está arriba del snake se come la comida
                                     comidacomida++;
-                                    if (comidacomida == 1) {
-                                        comida = 0;
-                                        cuerpo++;
-                                    }
+
+                                    comida = 0;
+                                    cuerpo++;
+
                                 }
                                 if (i - 1 >= 1) {
                                     tablero[i - 1][j] = m.verde;
@@ -247,6 +262,12 @@ public class Main {
                 }
                 tick2++;
                 if (tick2 > 3) {
+                    // Para linux
+                    try {
+                        Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "stty sane < /dev/tty"}).waitFor();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     break; // Si pònes dead = true, no mueres realmente, solo se muestra el mensaje de muerte y sigue el juego, pero si pones break, se termina el juego realmente.
                 }
             }
