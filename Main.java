@@ -22,6 +22,8 @@ public class Main {
         boolean dead = true;
         int direccion = 0; // 0 = derecha, 1 = abajo, 2 = izquierda, 3 = arriba
         int comida = 0;
+        int comidacomida = 0;
+        int cuerpo = 0;
         ///
         ////////////////////////////////////////////////////////////
         while (tick < 1000 && dead) {
@@ -33,14 +35,23 @@ public class Main {
             } catch (java.io.IOException e) {
                 e.printStackTrace();
             }
-            if (c == 'd') {
-                direccion = 0;
-            } else if (c == 's') {
-                direccion = 1;
-            } else if (c == 'a') {
-                direccion = 2;
-            } else if (c == 'w') {
-                direccion = 3;
+            if (dead) {
+                System.out.println("Usa las teclas WASD para mover el snake");
+
+                switch (c) {
+                    case 'd':
+                        direccion = 0;
+                        break;
+                    case 's':
+                        direccion = 1;
+                        break;
+                    case 'a':
+                        direccion = 2;
+                        break;
+                    case 'w':
+                        direccion = 3;
+                        break;
+                }
             }
 
             // Limpio la consola
@@ -57,7 +68,7 @@ public class Main {
                         tablero[tablero.length / 2][tablero[i].length / 2] = m.verde;
                     }
                 }
-                // Crea los bordes
+                // Crea los bordes, se hace solo al principio para que no se cree los bordes infinitamente
                 for (int i = 0; i < tablero.length; i++) {
                     for (int j = 0; j < tablero[i].length; j++) {
                         if (i == 0 || i == tablero.length - 1 || j == 0 || j == tablero[i].length - 1) {
@@ -89,83 +100,113 @@ public class Main {
                             }
                         }
                     }
-                }
-
-                // Aplico la direccion de el snake
-                switch (direccion) {
-                    case 0: // Derecha
-                        for (int i = 0; i < tablero.length; i++) {
-                            for (int j = tablero[i].length - 1; j >= 0; j--) {
-                                if (tablero[i][j].equals(m.verde)) {
-                                    tablero[i][j] = m.azul;
-                                    if (j + 1 < tablero[i].length) {
-                                        tablero[i][j + 1] = m.verde;
-                                    } else {
-                                        dead = false;
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    case 1: // Abajo
-                        for (int i = tablero.length - 1; i >= 0; i--) {
-                            for (int j = 0; j < tablero[i].length; j++) {
-                                if (tablero[i][j].equals(m.verde)) {
-                                    tablero[i][j] = m.azul;
-                                    if (i + 1 < tablero.length - 1) {
-                                        tablero[i + 1][j] = m.verde;
-                                    } else {
-                                        dead = false;
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    case 2: // Izquierda
-                        for (int i = 0; i < tablero.length; i++) {
-                            for (int j = 0; j < tablero[i].length; j++) {
-                                if (tablero[i][j].equals(m.verde)) {
-                                    tablero[i][j] = m.azul;
-                                    if (j - 1 >= 0) {
-                                        tablero[i][j - 1] = m.verde;
-                                    } else {
-                                        dead = false;
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    case 3: // Arriba
-                        for (int i = 0; i < tablero.length; i++) {
-                            for (int j = 0; j < tablero[i].length; j++) {
-                                if (tablero[i][j].equals(m.verde)) {
-                                    tablero[i][j] = m.azul;
-                                    if (i - 1 >= 1) {
-                                        tablero[i - 1][j] = m.verde;
-                                    } else {
-                                        dead = false;
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                }
-
-                // Imprimo el tablero
-                for (int i = 0; i < tablero.length; i++) {
-                    for (int j = 0; j < tablero[i].length; j++) {
-                        System.out.print(tablero[i][j]);
-                    }
-                    System.out.println("");
-                }
-                System.out.println("Segundos: " + tick);
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    comida++;
                 }
             }
+
+            // Aplico la direccion de el snake
+            switch (direccion) {
+                case 0: // Derecha
+                    for (int i = 0; i < tablero.length; i++) {
+                        for (int j = tablero[i].length - 1; j >= 0; j--) {
+                            if (tablero[i][j].equals(m.verde)) {
+                                tablero[i][j] = m.azul;
+                                if (tablero[i][j + 1].equals(m.rojo)) { // Si la comida está a la derecha del snake se come la comida
+                                    comidacomida++;
+                                    if (comidacomida == 1) {
+                                        comida = 0;
+                                        cuerpo++;
+                                    }
+                                }
+                                if (j + 1 < tablero[i].length) {
+                                    tablero[i][j + 1] = m.verde;
+                                } else {
+                                    dead = false;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 1: // Abajo
+                    for (int i = tablero.length - 1; i >= 0; i--) {
+                        for (int j = 0; j < tablero[i].length; j++) {
+                            if (tablero[i][j].equals(m.verde)) {
+                                tablero[i][j] = m.azul;
+                                if (tablero[i][i + 1].equals(m.rojo)) { // Si la comida está abajo del snake se come la comida
+                                    comidacomida++;
+                                    if (comidacomida == 1) {
+                                        comida = 0;
+                                        cuerpo++;
+                                    }
+                                }
+                                if (i + 1 < tablero.length - 1) {
+                                    tablero[i + 1][j] = m.verde;
+                                } else {
+                                    dead = false;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 2: // Izquierda
+                    for (int i = 0; i < tablero.length; i++) {
+                        for (int j = 0; j < tablero[i].length; j++) {
+                            if (tablero[i][j].equals(m.verde)) {
+                                tablero[i][j] = m.azul;
+                                if (tablero[i][j - 1].equals(m.rojo)) { // Si la comida está a la izquierda del snake se come la comida
+                                    comidacomida++;
+                                    if (comidacomida == 1) {
+                                        comida = 0;
+                                        cuerpo++;
+                                    }
+                                }
+                                if (j - 1 >= 0) {
+                                    tablero[i][j - 1] = m.verde;
+                                } else {
+                                    dead = false;
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case 3: // Arriba
+                    for (int i = 0; i < tablero.length; i++) {
+                        for (int j = 0; j < tablero[i].length; j++) {
+                            if (tablero[i][j].equals(m.verde)) {
+                                tablero[i][j] = m.azul;
+                                if (tablero[i][i - 1].equals(m.rojo)) { // Si la comida está arriba del snake se come la comida
+                                    comidacomida++;
+                                    if (comidacomida == 1) {
+                                        comida = 0;
+                                        cuerpo++;
+                                    }
+                                }
+                                if (i - 1 >= 1) {
+                                    tablero[i - 1][j] = m.verde;
+                                } else {
+                                    dead = false;
+                                }
+                            }
+                        }
+                    }
+                    break;
+            }
+
+            // Imprimo el tablero
+            for (int i = 0; i < tablero.length; i++) {
+                for (int j = 0; j < tablero[i].length; j++) {
+                    System.out.print(tablero[i][j]);
+                }
+                System.out.println("");
+            }
+            System.out.println("Segundos: " + tick);
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             // Muerte
             int tick2 = 0;
             while (!dead) {
