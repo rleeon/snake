@@ -29,9 +29,19 @@ public class Main {
         int cuerpo = 0;
         ///
         ////////////////////////////////////////////////////////////
-        /// Coloco el terminal en modo raw para que no haga falta pulsar enter para leer la entrada, esto es para linux, en windows no es posilbe
+        /// 
+        /// Siempre se ejecuta antes de poner en modo raw
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    try {
+                        Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", "stty sane < /dev/tty" }).waitFor();
+                    } catch (Exception ignored) {
+                    }
+                }));
+        /// 
+        /// Coloco el terminal en modo raw para que no haga falta pulsar enter para leer
+        /// la entrada, esto es para linux, en windows no es posilbe
         try {
-            Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "stty raw -echo < /dev/tty"}).waitFor();
+            Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", "stty raw -echo < /dev/tty" }).waitFor();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -83,7 +93,8 @@ public class Main {
                         tablero[tablero.length / 2][tablero[i].length / 2] = m.verde;
                     }
                 }
-                // Crea los bordes, se hace solo al principio para que no se cree los bordes infinitamente
+                // Crea los bordes, se hace solo al principio para que no se cree los bordes
+                // infinitamente
                 for (int i = 0; i < tablero.length; i++) {
                     for (int j = 0; j < tablero[i].length; j++) {
                         if (i == 0 || i == tablero.length - 1 || j == 0 || j == tablero[i].length - 1) {
@@ -126,14 +137,15 @@ public class Main {
                         for (int j = tablero[i].length - 1; j >= 0; j--) {
                             if (tablero[i][j].equals(m.verde)) {
                                 tablero[i][j] = m.azul;
-                                if (tablero[i][j + 1].equals(m.rojo)) { // Si la comida está a la derecha del snake se come la comida
+                                if (tablero[i][j + 1].equals(m.rojo)) { // Si la comida está a la derecha del snake se
+                                                                        // come la comida
+                                    tablero[i][j + 1] = m.verde;
                                     comidacomida++;
 
                                     comida = 0;
                                     cuerpo++;
 
-                                }
-                                if (j + 1 < tablero[i].length) {
+                                } else if (!tablero[i][j + 1].equals(m.amarillo)) {
                                     tablero[i][j + 1] = m.verde;
                                 } else {
                                     dead = false;
@@ -147,14 +159,15 @@ public class Main {
                         for (int j = 0; j < tablero[i].length; j++) {
                             if (tablero[i][j].equals(m.verde)) {
                                 tablero[i][j] = m.azul;
-                                if (tablero[i + 1][j].equals(m.rojo)) { // Si la comida está abajo del snake se come la comida
+                                if (tablero[i + 1][j].equals(m.rojo)) { // Si la comida está abajo del snake se come la
+                                                                        // comida
+                                    tablero[i + 1][j] = m.verde;
                                     comidacomida++;
 
                                     comida = 0;
                                     cuerpo++;
 
-                                }
-                                if (i + 1 < tablero.length - 1) {
+                                } else if (!tablero[i + 1][j].equals(m.amarillo)) {
                                     tablero[i + 1][j] = m.verde;
                                 } else {
                                     dead = false;
@@ -168,14 +181,15 @@ public class Main {
                         for (int j = 0; j < tablero[i].length; j++) {
                             if (tablero[i][j].equals(m.verde)) {
                                 tablero[i][j] = m.azul;
-                                if (tablero[i][j - 1].equals(m.rojo)) { // Si la comida está a la izquierda del snake se come la comida
+                                if (tablero[i][j - 1].equals(m.rojo)) { // Si la comida está a la izquierda del snake se
+                                                                        // come la comida
+                                    tablero[i][j - 1] = m.verde;
                                     comidacomida++;
 
                                     comida = 0;
                                     cuerpo++;
 
-                                }
-                                if (j - 1 >= 0) {
+                                } else if (!tablero[i][j - 1].equals(m.amarillo)) {
                                     tablero[i][j - 1] = m.verde;
                                 } else {
                                     dead = false;
@@ -189,14 +203,15 @@ public class Main {
                         for (int j = 0; j < tablero[i].length; j++) {
                             if (tablero[i][j].equals(m.verde)) {
                                 tablero[i][j] = m.azul;
-                                if (tablero[i - 1][j].equals(m.rojo)) { // Si la comida está arriba del snake se come la comida
+                                if (tablero[i - 1][j].equals(m.rojo)) { // Si la comida está arriba del snake se come la
+                                                                        // comida
+                                    tablero[i - 1][j] = m.verde;
                                     comidacomida++;
 
                                     comida = 0;
                                     cuerpo++;
 
-                                }
-                                if (i - 1 >= 1) {
+                                } else if (!tablero[i - 1][j].equals(m.amarillo)) {
                                     tablero[i - 1][j] = m.verde;
                                 } else {
                                     dead = false;
@@ -212,9 +227,10 @@ public class Main {
                 for (int j = 0; j < tablero[i].length; j++) {
                     System.out.print(tablero[i][j]);
                 }
-                System.out.println("");
+                System.out.print("\r\n");
             }
-            System.out.println("Segundos: " + tick);
+            System.out.print("Segundos: " + tick + "\r\n");
+            System.out.print("Comida: " + comidacomida + "\r\n");
 
             try {
                 Thread.sleep(1000);
@@ -227,7 +243,7 @@ public class Main {
             while (!dead) {
                 switch (tick2) {
                     case 0:
-                        System.out.println("Has muerto");
+                        System.out.println("Has muerto \r\n");
                         try {
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
@@ -235,7 +251,7 @@ public class Main {
                         }
                         break;
                     case 1:
-                        System.out.println("Has muerto.");
+                        System.out.println("Has muerto. \r\n");
                         try {
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
@@ -244,7 +260,7 @@ public class Main {
 
                         break;
                     case 2:
-                        System.out.println("Has muerto..");
+                        System.out.println("Has muerto.. \r\n");
                         try {
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
@@ -252,7 +268,7 @@ public class Main {
                         }
                         break;
                     case 3:
-                        System.out.println("Has muerto...");
+                        System.out.println("Has muerto... \r\n");
                         try {
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
@@ -260,16 +276,9 @@ public class Main {
                         }
                         break;
                 }
-                tick2++;
-                if (tick2 > 3) {
-                    // Para linux
-                    try {
-                        Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", "stty sane < /dev/tty"}).waitFor();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break; // Si pònes dead = true, no mueres realmente, solo se muestra el mensaje de muerte y sigue el juego, pero si pones break, se termina el juego realmente.
-                }
+            tick2++;
+            if (tick2 == 3){ break; } // si pones (dead = true) creara un bucle y no saldra nunca de el juego, al poner break si, esta dentro de el if para que se ejecute lo anterior.
+                                             // Osea cambia este if si modificas la muerte (dead)
             }
         }
     }
