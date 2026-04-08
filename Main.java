@@ -1,4 +1,7 @@
 
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Deque;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Main {
@@ -26,18 +29,22 @@ public class Main {
         boolean dead = true;
         int comida = 0;
         int comidacomida = 0;
-        int cuerpo = 0;
+
+        int x = 0;
+        int y = 0;
+        Deque<String[]> cuerpo = new ArrayDeque<>();
+
         ///
         ////////////////////////////////////////////////////////////
-        /// 
+        ///
         /// Siempre se ejecuta antes de poner en modo raw
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    try {
-                        Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", "stty sane < /dev/tty" }).waitFor();
-                    } catch (Exception ignored) {
-                    }
-                }));
-        /// 
+            try {
+                Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", "stty sane < /dev/tty" }).waitFor();
+            } catch (Exception ignored) {
+            }
+        }));
+        ///
         /// Coloco el terminal en modo raw para que no haga falta pulsar enter para leer
         /// la entrada, esto es para linux, en windows no es posilbe
         try {
@@ -87,6 +94,7 @@ public class Main {
 
             // Crea el snake
             if (tick <= 1) {
+                cuerpo.addFirst(new String[] { "D" });
                 // Coloca el snake en el centro del tablero
                 for (int i = 0; i < tablero.length; i++) {
                     for (int j = 0; j < tablero[i].length; j++) {
@@ -137,13 +145,17 @@ public class Main {
                         for (int j = tablero[i].length - 1; j >= 0; j--) {
                             if (tablero[i][j].equals(m.verde)) {
                                 tablero[i][j] = m.azul;
+                                if (!tablero[i][j + 1].equals(m.rojo)){
+                                    cuerpo.removeLast();
+                                    cuerpo.addFirst(new String[] { "D" });
+                                }
                                 if (tablero[i][j + 1].equals(m.rojo)) { // Si la comida está a la derecha del snake se
                                                                         // come la comida
                                     tablero[i][j + 1] = m.verde;
                                     comidacomida++;
 
                                     comida = 0;
-                                    cuerpo++;
+                                    cuerpo.addFirst(new String[] { "D" });
 
                                 } else if (!tablero[i][j + 1].equals(m.amarillo)) {
                                     tablero[i][j + 1] = m.verde;
@@ -159,13 +171,17 @@ public class Main {
                         for (int j = 0; j < tablero[i].length; j++) {
                             if (tablero[i][j].equals(m.verde)) {
                                 tablero[i][j] = m.azul;
+                                if (!tablero[i + 1][j].equals(m.rojo)){
+                                    cuerpo.removeLast();
+                                    cuerpo.addFirst(new String[] { "S" });
+                                }
                                 if (tablero[i + 1][j].equals(m.rojo)) { // Si la comida está abajo del snake se come la
                                                                         // comida
                                     tablero[i + 1][j] = m.verde;
                                     comidacomida++;
 
                                     comida = 0;
-                                    cuerpo++;
+                                    cuerpo.addFirst(new String[] { "S" });
 
                                 } else if (!tablero[i + 1][j].equals(m.amarillo)) {
                                     tablero[i + 1][j] = m.verde;
@@ -181,13 +197,17 @@ public class Main {
                         for (int j = 0; j < tablero[i].length; j++) {
                             if (tablero[i][j].equals(m.verde)) {
                                 tablero[i][j] = m.azul;
+                                if (!tablero[i][j - 1].equals(m.rojo)){
+                                    cuerpo.removeLast();
+                                    cuerpo.addFirst(new String[] { "A" });
+                                }
                                 if (tablero[i][j - 1].equals(m.rojo)) { // Si la comida está a la izquierda del snake se
                                                                         // come la comida
                                     tablero[i][j - 1] = m.verde;
                                     comidacomida++;
 
                                     comida = 0;
-                                    cuerpo++;
+                                    cuerpo.addFirst(new String[] { "A" });
 
                                 } else if (!tablero[i][j - 1].equals(m.amarillo)) {
                                     tablero[i][j - 1] = m.verde;
@@ -203,13 +223,17 @@ public class Main {
                         for (int j = 0; j < tablero[i].length; j++) {
                             if (tablero[i][j].equals(m.verde)) {
                                 tablero[i][j] = m.azul;
+                                if (!tablero[i - 1][j].equals(m.rojo)){
+                                    cuerpo.removeLast();
+                                    cuerpo.addFirst(new String[] { "W" });
+                                }
                                 if (tablero[i - 1][j].equals(m.rojo)) { // Si la comida está arriba del snake se come la
                                                                         // comida
                                     tablero[i - 1][j] = m.verde;
                                     comidacomida++;
 
                                     comida = 0;
-                                    cuerpo++;
+                                    cuerpo.addFirst(new String[] { "W" });
 
                                 } else if (!tablero[i - 1][j].equals(m.amarillo)) {
                                     tablero[i - 1][j] = m.verde;
@@ -231,9 +255,12 @@ public class Main {
             }
             System.out.print("Segundos: " + tick + "\r\n");
             System.out.print("Comida: " + comidacomida + "\r\n");
+            for (String[] arr : cuerpo) {
+                System.out.println(Arrays.toString(arr) + "\r\n");
+            }
 
             try {
-                Thread.sleep(1000);
+                Thread.sleep(259);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -276,9 +303,12 @@ public class Main {
                         }
                         break;
                 }
-            tick2++;
-            if (tick2 == 3){ break; } // si pones (dead = true) creara un bucle y no saldra nunca de el juego, al poner break si, esta dentro de el if para que se ejecute lo anterior.
-                                             // Osea cambia este if si modificas la muerte (dead)
+                tick2++;
+                if (tick2 == 3) {
+                    break;
+                } // si pones (dead = true) creara un bucle y no saldra nunca de el juego, al
+                  // poner break si, esta dentro de el if para que se ejecute lo anterior.
+                  // Osea cambia este if si modificas la muerte (dead)
             }
         }
     }
