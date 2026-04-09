@@ -27,12 +27,15 @@ public class Main {
         }
         int tick = 0;
         boolean dead = true;
+        boolean debug = true;
         int comida = 0;
         int comidacomida = 0;
 
         int x = 0;
         int y = 0;
+        String[][] cabeza = new String[i1][j1];
         Deque<String[]> cuerpo = new ArrayDeque<>();
+        boolean comidaaumentar = false;
 
         ///
         ////////////////////////////////////////////////////////////
@@ -75,6 +78,9 @@ public class Main {
                         case 'w':
                             direccion.set(3);
                             break;
+                        case 'q':
+                            direccion.set(4);
+                            break;
                     }
                 } catch (java.io.IOException e) {
                     e.printStackTrace();
@@ -98,7 +104,7 @@ public class Main {
                 // Coloca el snake en el centro del tablero
                 for (int i = 0; i < tablero.length; i++) {
                     for (int j = 0; j < tablero[i].length; j++) {
-                        tablero[tablero.length / 2][tablero[i].length / 2] = m.verde;
+                        tablero[tablero.length / 2][tablero[i].length / 2] = (cabeza[i][j] = m.verde);
                     }
                 }
                 // Crea los bordes, se hace solo al principio para que no se cree los bordes
@@ -143,17 +149,19 @@ public class Main {
                 case 0: // Derecha
                     for (int i = 0; i < tablero.length; i++) {
                         for (int j = tablero[i].length - 1; j >= 0; j--) {
-                            if (tablero[i][j].equals(m.verde)) {
+                            if (tablero[i][j] == cabeza[i][j]) {
+                                x = i;
+                                y = j;
                                 tablero[i][j] = m.azul;
-                                if (!tablero[i][j + 1].equals(m.rojo)){
+                                if (!tablero[i][j + 1].equals(m.rojo)) {
                                     cuerpo.removeLast();
                                     cuerpo.addFirst(new String[] { "D" });
                                 }
                                 if (tablero[i][j + 1].equals(m.rojo)) { // Si la comida está a la derecha del snake se
                                                                         // come la comida
-                                    tablero[i][j + 1] = m.verde;
+                                    tablero[i][j + 1] = cabeza[i][j + 1];
                                     comidacomida++;
-
+                                    comidaaumentar = true;
                                     comida = 0;
                                     cuerpo.addFirst(new String[] { "D" });
 
@@ -169,17 +177,19 @@ public class Main {
                 case 1: // Abajo
                     for (int i = tablero.length - 1; i >= 0; i--) {
                         for (int j = 0; j < tablero[i].length; j++) {
-                            if (tablero[i][j].equals(m.verde)) {
+                            if (tablero[i][j] == cabeza[i][j]) {
+                                x = i;
+                                y = j;
                                 tablero[i][j] = m.azul;
-                                if (!tablero[i + 1][j].equals(m.rojo)){
+                                if (!tablero[i + 1][j].equals(m.rojo)) {
                                     cuerpo.removeLast();
                                     cuerpo.addFirst(new String[] { "S" });
                                 }
                                 if (tablero[i + 1][j].equals(m.rojo)) { // Si la comida está abajo del snake se come la
                                                                         // comida
-                                    tablero[i + 1][j] = m.verde;
+                                    tablero[i + 1][j] = cabeza[i + 1][j];
                                     comidacomida++;
-
+                                    comidaaumentar = true;
                                     comida = 0;
                                     cuerpo.addFirst(new String[] { "S" });
 
@@ -195,17 +205,19 @@ public class Main {
                 case 2: // Izquierda
                     for (int i = 0; i < tablero.length; i++) {
                         for (int j = 0; j < tablero[i].length; j++) {
-                            if (tablero[i][j].equals(m.verde)) {
+                            if (tablero[i][j] == cabeza[i][j]) {
+                                x = i;
+                                y = j;
                                 tablero[i][j] = m.azul;
-                                if (!tablero[i][j - 1].equals(m.rojo)){
+                                if (!tablero[i][j - 1].equals(m.rojo)) {
                                     cuerpo.removeLast();
                                     cuerpo.addFirst(new String[] { "A" });
                                 }
                                 if (tablero[i][j - 1].equals(m.rojo)) { // Si la comida está a la izquierda del snake se
                                                                         // come la comida
-                                    tablero[i][j - 1] = m.verde;
+                                    tablero[i][j - 1] = cabeza[i][j - 1];
                                     comidacomida++;
-
+                                    comidaaumentar = true;
                                     comida = 0;
                                     cuerpo.addFirst(new String[] { "A" });
 
@@ -221,17 +233,20 @@ public class Main {
                 case 3: // Arriba
                     for (int i = 0; i < tablero.length; i++) {
                         for (int j = 0; j < tablero[i].length; j++) {
-                            if (tablero[i][j].equals(m.verde)) {
+                            if (tablero[i][j] == cabeza[i][j]) {
+                                x = i;
+                                y = j;
                                 tablero[i][j] = m.azul;
-                                if (!tablero[i - 1][j].equals(m.rojo)){
+                                cabeza[i][j] = m.verde;
+                                if (!tablero[i - 1][j].equals(m.rojo)) {
                                     cuerpo.removeLast();
                                     cuerpo.addFirst(new String[] { "W" });
                                 }
                                 if (tablero[i - 1][j].equals(m.rojo)) { // Si la comida está arriba del snake se come la
                                                                         // comida
-                                    tablero[i - 1][j] = m.verde;
+                                    tablero[i - 1][j] = cabeza[i - 1][j];
                                     comidacomida++;
-
+                                    comidaaumentar = true;
                                     comida = 0;
                                     cuerpo.addFirst(new String[] { "W" });
 
@@ -244,6 +259,51 @@ public class Main {
                         }
                     }
                     break;
+                case 4:
+                    if (debug == true) {
+                        debug = false;
+                        try {
+                            Thread.sleep(10000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }else {
+                        debug = true;
+                    }
+                    break;
+            }
+            int i2 = 0;
+            int j2 = 0;
+            for (int i = 0; i < tablero.length; i++) {
+                for (int j = 0; j < tablero[i].length; j++) {
+                    if (tablero[i][j] == cabeza[i][j]) {
+                        for (String[] arr : cuerpo) {
+                            switch (arr[0]) { 
+                                case "A": 
+
+                                break;
+ 
+                                case "W": 
+
+                                break;
+ 
+                                case "S": 
+  
+                                break;
+
+                                case "D": 
+
+                            }
+                            // Debug
+                            if (debug){
+                                for (int k = 0; k < comidacomida; k++) {
+                                    System.out.println(i2 + " " + j2);
+                                }
+                            }
+                        }
+                    }
+
+                }
             }
 
             // Imprimo el tablero
@@ -255,8 +315,10 @@ public class Main {
             }
             System.out.print("Segundos: " + tick + "\r\n");
             System.out.print("Comida: " + comidacomida + "\r\n");
-            for (String[] arr : cuerpo) {
+            if (debug) {
+                for (String[] arr : cuerpo) {
                 System.out.println(Arrays.toString(arr) + "\r\n");
+                } 
             }
 
             try {
