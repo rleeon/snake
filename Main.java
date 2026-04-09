@@ -149,6 +149,7 @@ public class Main {
                 case 0: // Derecha
                     for (int i = 0; i < tablero.length; i++) {
                         for (int j = tablero[i].length - 1; j >= 0; j--) {
+                            // Cabiar a, si i == x y j == y, ya que si dejo esti ocurren los errores.
                             if (tablero[i][j] == cabeza[i][j]) {
                                 x = i;
                                 y = j;
