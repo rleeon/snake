@@ -108,78 +108,46 @@ public class Main {
             // borra todo y lo pone azul.
             for (int i = 0; i < tablero.length; i++) {
                 for (int j = 0; j < tablero[i].length; j++) {
-                    if (i == 0 || i == tablero.length + 1 || j == 0 || j == tablero[i].length + 1 || i == 0 || i == (tablero.length - 1) || j == 0 || j == (tablero[i].length - 1)) {
+                    if (tablero[i][j].equals(m.verde)) {
                         tablero[i][j] = m.azul;
                     }
                 }
             }
-                // Crea los bordes.
-                for (int i = 0; i < tablero.length; i++) {
-                    for (int j = 0; j < tablero[i].length; j++) {
-                        if (i == 0 || i == tablero.length - 1 || j == 0 || j == tablero[i].length - 1) {
-                            tablero[i][j] = m.amarillo;
-                        }
+            // Crea los bordes.
+            for (int i = 0; i < tablero.length; i++) {
+                for (int j = 0; j < tablero[i].length; j++) {
+                    if (i == 0 || i == tablero.length - 1 || j == 0 || j == tablero[i].length - 1) {
+                        tablero[i][j] = m.amarillo;
                     }
                 }
+            }
             int x2 = x;
             int y2 = y;
 
-            for (String[] arr : cuerpo) {
-                switch (arr[0]) {
-                    case "D":
-                        if (!tablero[x2][y2 - 1].equals(m.rojo) && !tablero[x2][y2 - 1].equals(m.amarillo)) {
-                            tablero[x2][y2 - 1] = m.azul;
-                        }
-                        y2 -= 1;
-                        break;
-                    case "S":
-                        if (!tablero[x2 - 1][y2].equals(m.rojo) && !tablero[x2 - 1][y2].equals(m.amarillo)) {
-                            tablero[x2 - 1][y2] = m.azul;
-                        }
-                        x2 -= 1;
-                        break;
-                    case "A":
-                        if (!tablero[x2][y2 + 1].equals(m.rojo) && !tablero[x2][y2 + 1].equals(m.amarillo)) {
-                            tablero[x2][y2 + 1] = m.azul;
-                        }
-                        y2 += 1;
-                        break;
-                    case "W":
-                        if (!tablero[x2 + 1][y2].equals(m.rojo) && !tablero[x2 + 1][y2].equals(m.amarillo)) {
-                            tablero[x2 + 1][y2] = m.azul;
-                        }
-                        x2 += 1;
-                        break;
+            boolean haycomida = false;
 
-                    default:
-                        break;
-                }
-            }
+            ////////////////////////////////////////////////////////////////////////////
+            /// Podria ser mejor, podria usar una lista de pociciones de azul, y solo elegir 
+            // una de esas posiciones para poner la comida, asi cuando el tablero este 
+            // casi lleno no tendiran que pasar algunos ticks para que salga la comida, 
+            // por culpa de el Math random.
+            //
 
-            // Creo la comida
-            int n1 = (int) (Math.random() * i1);
-            int n2 = (int) (Math.random() * j1);
-
-            // Si la comida cae en el snake, se vuelve a generar
-            while (tablero[n1][n2].equals(m.verde) || tablero[n1][n2].equals(m.amarillo)) {
-                n1 = (int) (Math.random() * i1);
-                n2 = (int) (Math.random() * j1);
-            }
-
-            // Coloco la comida
-            if (comida == 0) {
-                if (tablero[n1][n2].equals(m.azul)) {
-                    for (int i = 0; i < tablero.length; i++) {
-                        for (int j = 0; j < tablero[i].length; j++) {
-                            if (tablero[n1][n2].equals(m.azul)) {
-                                tablero[n1][n2] = m.rojo;
-                            } else if (!tablero[n1][n2].equals(m.verde) && !tablero[n1][n2].equals(m.rojo)) {
-                                tablero[i][j] = m.azul;
-                            }
-                        }
+            for (int i = 0; i < tablero.length; i++) {
+                for (int j = 0; j < tablero[i].length; j++) {
+                    if (tablero[i][j].equals(m.rojo)) {
+                        haycomida = true;
                     }
-                    comida++;
                 }
+            }
+            if (!haycomida) {
+                int n1 = (int) (Math.random() * i1);
+                int n2 = (int) (Math.random() * j1);
+                while (!tablero[n1][n2].equals(m.azul)) {
+                    n1 = (int) (Math.random() * i1);
+                    n2 = (int) (Math.random() * j1);
+                }
+                tablero[n1][n2] = m.rojo;
             }
 
             // Aplico la direccion de el snake
@@ -190,24 +158,21 @@ public class Main {
                             if (i == x && j == y) {
                                 if (tick != 1) {
                                     if (tablero[i][j + 1].equals(m.verde)) {
-                                        // dead = false;
+                                        dead = false;
                                     }
                                     if (tablero[i][j + 1].equals(m.amarillo)) {
-                                        // dead = false;
+                                        dead = false;
                                     }
-                                }
-                                if (!tablero[i][j + 1].equals(m.rojo)) {
-                                    cuerpo.removeLast();
-                                    cuerpo.addFirst(new String[] { "D" });
-                                    y += 1;
                                 }
                                 if (tablero[i][j + 1].equals(m.rojo)) {
                                     comidacomida++;
                                     comida = 0;
-                                    cuerpo.removeLast();
-                                    cuerpo.addFirst(new String[] { "D" });
                                     cuerpo.addFirst(new String[] { "D" });
 
+                                    y += 1;
+                                } else if (!tablero[i][j + 1].equals(m.rojo)) {
+                                    cuerpo.removeLast();
+                                    cuerpo.addFirst(new String[] { "D" });
                                     y += 1;
                                 }
                             }
@@ -220,24 +185,21 @@ public class Main {
                             if (i == x && j == y) {
                                 if (tick != 1) {
                                     if (tablero[i + 1][j].equals(m.verde)) {
-                                        // dead = false;
+                                        dead = false;
                                     }
                                     if (tablero[i + 1][j].equals(m.amarillo)) {
-                                        // dead = false;
+                                        dead = false;
                                     }
-                                }
-                                if (!tablero[i + 1][j].equals(m.rojo)) {
-                                    cuerpo.removeLast();
-                                    cuerpo.addFirst(new String[] { "S" });
-                                    x += 1;
                                 }
                                 if (tablero[i + 1][j].equals(m.rojo)) {
                                     comidacomida++;
                                     comida = 0;
-                                    cuerpo.removeLast();
-                                    cuerpo.addFirst(new String[] { "S" });
                                     cuerpo.addFirst(new String[] { "S" });
 
+                                    x += 1;
+                                } else if (!tablero[i + 1][j].equals(m.rojo)) {
+                                    cuerpo.removeLast();
+                                    cuerpo.addFirst(new String[] { "S" });
                                     x += 1;
                                 }
                             }
@@ -250,24 +212,21 @@ public class Main {
                             if (i == x && j == y) {
                                 if (tick != 1) {
                                     if (tablero[i][j - 1].equals(m.verde)) {
-                                        // dead = false;
+                                        dead = false;
                                     }
                                     if (tablero[i][j - 1].equals(m.amarillo)) {
-                                        // dead = false;
+                                        dead = false;
                                     }
-                                }
-                                if (!tablero[i][j - 1].equals(m.rojo)) {
-                                    cuerpo.removeLast();
-                                    cuerpo.addFirst(new String[] { "A" });
-                                    y -= 1;
                                 }
                                 if (tablero[i][j - 1].equals(m.rojo)) {
                                     comidacomida++;
                                     comida = 0;
-                                    cuerpo.removeLast();
-                                    cuerpo.addFirst(new String[] { "A" });
                                     cuerpo.addFirst(new String[] { "A" });
 
+                                    y -= 1;
+                                } else if (!tablero[i][j - 1].equals(m.rojo)) {
+                                    cuerpo.removeLast();
+                                    cuerpo.addFirst(new String[] { "A" });
                                     y -= 1;
                                 }
                             }
@@ -280,24 +239,21 @@ public class Main {
                             if (i == x && j == y) {
                                 if (tick != 1) {
                                     if (tablero[i - 1][j].equals(m.verde)) {
-                                        // dead = false;
+                                        dead = false;
                                     }
                                     if (tablero[i - 1][j].equals(m.amarillo)) {
-                                        // dead = false;
+                                        dead = false;
                                     }
-                                }
-                                if (!tablero[i - 1][j].equals(m.rojo)) {
-                                    cuerpo.removeLast();
-                                    cuerpo.addFirst(new String[] { "W" });
-                                    x -= 1;
                                 }
                                 if (tablero[i - 1][j].equals(m.rojo)) {
                                     comidacomida++;
                                     comida = 0;
-                                    cuerpo.removeLast();
-                                    cuerpo.addFirst(new String[] { "W" });
                                     cuerpo.addFirst(new String[] { "W" });
 
+                                    x -= 1;
+                                } else if (!tablero[i - 1][j].equals(m.rojo)) {
+                                    cuerpo.removeLast();
+                                    cuerpo.addFirst(new String[] { "W" });
                                     x -= 1;
                                 }
                             }
@@ -305,28 +261,40 @@ public class Main {
                     }
                     break;
                 case 4:
-                    cuerpo.addFirst(new String[] { "" });
+                    comida = 0;
                     break;
+            }
+            if (debug) {
+
+                System.out.println("CABEZA: " + x + "," + y + " DEQUE: " + cuerpo.size());
+                for (String[] arr : cuerpo) {
+                    System.out.print(arr[0] + " ");
+
+                }
+                if (comida == 0) {
+                    System.out.print("HE COMIDO!!");
+                }
+                System.out.println();
             }
             x2 = x;
             y2 = y;
             for (String[] arr : cuerpo) {
                 switch (arr[0]) {
                     case "D":
-                        tablero[x2][y2 + 1] = m.verde;
-                        y2 += 1;
-                        break;
-                    case "S":
-                        tablero[x2 + 1][y2] = m.verde;
-                        x2 += 1;
-                        break;
-                    case "A":
                         tablero[x2][y2 - 1] = m.verde;
                         y2 -= 1;
                         break;
-                    case "W":
+                    case "S":
                         tablero[x2 - 1][y2] = m.verde;
                         x2 -= 1;
+                        break;
+                    case "A":
+                        tablero[x2][y2 + 1] = m.verde;
+                        y2 += 1;
+                        break;
+                    case "W":
+                        tablero[x2 + 1][y2] = m.verde;
+                        x2 += 1;
                         break;
 
                     default:
@@ -343,9 +311,6 @@ public class Main {
             }
             System.out.print("Segundos: " + tick + "\r\n");
             System.out.print("Comida: " + comidacomida + "\r\n");
-            for (String[] arr : cuerpo) {
-                System.out.println(Arrays.toString(arr) + "\r\n");
-            }
 
             try {
                 Thread.sleep(159);
