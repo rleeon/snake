@@ -76,7 +76,7 @@ public class Main {
                         case 'w':
                             direccion.set(3);
                             break;
-                        case 'q':
+                        case ' ':
                             direccion.set(4);
                             break;
                     }
@@ -105,6 +105,44 @@ public class Main {
                 tablero[x][y] = m.verde;
                 cabeza[x][y] = m.verde;
             }
+            // Morir antes de borrar, por bugs.
+            switch(direccion.get()){
+                case 0:
+                    if (tablero[x][y + 1].equals(m.verde)) {
+                        dead = false;
+                    }
+                    if (tablero[x][y + 1].equals(m.amarillo)) {
+                        dead = false;
+                    }
+                    break;
+                case 1:
+                    if (tablero[x + 1][y].equals(m.verde)) {
+                        dead = false;
+                    }
+                    if (tablero[x + 1][y].equals(m.amarillo)) {
+                        dead = false;
+                    }
+                    break;
+                case 2:
+                    if (tablero[x][y - 1].equals(m.verde)) {
+                        dead = false;
+                    }
+                    if (tablero[x][y - 1].equals(m.amarillo)) {
+                        dead = false;
+                    }
+                    break;
+                case 3:
+                    if (tablero[x - 1][y].equals(m.verde)) {
+                        dead = false;
+                    }
+                    if (tablero[x - 1][y].equals(m.amarillo)) {
+                        dead = false;
+                    }
+                    break;
+                case 4:
+                    break;
+            }
+
             // borra todo y lo pone azul.
             for (int i = 0; i < tablero.length; i++) {
                 for (int j = 0; j < tablero[i].length; j++) {
@@ -156,14 +194,6 @@ public class Main {
                     for (int i = 0; i < tablero.length; i++) {
                         for (int j = tablero[i].length - 1; j >= 0; j--) {
                             if (i == x && j == y) {
-                                if (tick != 1) {
-                                    if (tablero[i][j + 1].equals(m.verde)) {
-                                        dead = false;
-                                    }
-                                    if (tablero[i][j + 1].equals(m.amarillo)) {
-                                        dead = false;
-                                    }
-                                }
                                 if (tablero[i][j + 1].equals(m.rojo)) {
                                     comidacomida++;
                                     comida = 0;
@@ -183,14 +213,6 @@ public class Main {
                     for (int i = tablero.length - 1; i >= 0; i--) {
                         for (int j = 0; j < tablero[i].length; j++) {
                             if (i == x && j == y) {
-                                if (tick != 1) {
-                                    if (tablero[i + 1][j].equals(m.verde)) {
-                                        dead = false;
-                                    }
-                                    if (tablero[i + 1][j].equals(m.amarillo)) {
-                                        dead = false;
-                                    }
-                                }
                                 if (tablero[i + 1][j].equals(m.rojo)) {
                                     comidacomida++;
                                     comida = 0;
@@ -210,14 +232,6 @@ public class Main {
                     for (int i = 0; i < tablero.length; i++) {
                         for (int j = 0; j < tablero[i].length; j++) {
                             if (i == x && j == y) {
-                                if (tick != 1) {
-                                    if (tablero[i][j - 1].equals(m.verde)) {
-                                        dead = false;
-                                    }
-                                    if (tablero[i][j - 1].equals(m.amarillo)) {
-                                        dead = false;
-                                    }
-                                }
                                 if (tablero[i][j - 1].equals(m.rojo)) {
                                     comidacomida++;
                                     comida = 0;
@@ -237,14 +251,6 @@ public class Main {
                     for (int i = 0; i < tablero.length; i++) {
                         for (int j = 0; j < tablero[i].length; j++) {
                             if (i == x && j == y) {
-                                if (tick != 1) {
-                                    if (tablero[i - 1][j].equals(m.verde)) {
-                                        dead = false;
-                                    }
-                                    if (tablero[i - 1][j].equals(m.amarillo)) {
-                                        dead = false;
-                                    }
-                                }
                                 if (tablero[i - 1][j].equals(m.rojo)) {
                                     comidacomida++;
                                     comida = 0;
@@ -261,7 +267,7 @@ public class Main {
                     }
                     break;
                 case 4:
-                    comida = 0;
+                    // Pausa xd
                     break;
             }
             if (debug) {
