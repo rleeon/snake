@@ -105,7 +105,7 @@ public class Main {
         while (tick < 10000000 && dead) {
 
             // Reposiciono el cursor
-            System.out.println("\033[H");
+            System.out.print("\033[H");
             System.out.flush();
 
             tick++; // Aumento el tick
