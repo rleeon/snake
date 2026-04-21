@@ -8,6 +8,7 @@ public class Main {
 
     String azul = "\u001B[44m \u001B[0m";
     String rojo = "\u001B[41m \u001B[0m";
+    String rojoClaro = "\u001B[101m \u001B[0m";
     String verde = "\u001B[42m \u001B[0m";
     String amarillo = "\u001B[43m \u001B[0m";
     boolean colocar = false;
@@ -28,11 +29,16 @@ public class Main {
         int tick = 0;
         boolean dead = true;
         boolean debug = false;
+        boolean animacion2 = false;
+        int animacion2tick = 0;
         int comida = 0;
         int comidacomida = 0;
 
         int x = 0;
         int y = 0;
+        int x4 = 0;
+        int y4 = 0;
+        boolean animacion = false;
         String[][] cabeza = new String[i1][j1];
         Deque<String[]> cuerpo = new ArrayDeque<>();
         ///
@@ -40,6 +46,8 @@ public class Main {
         ///
         /// Siempre se ejecuta antes de poner en modo raw
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.print("\033[?1049l");
+            System.out.print("\033[?25h");
             try {
                 Runtime.getRuntime().exec(new String[] { "/bin/sh", "-c", "stty sane < /dev/tty" }).waitFor();
             } catch (Exception ignored) {
@@ -53,6 +61,10 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        // Limpio la consola y oculto el cursor
+        System.out.print("\033[?1049h");
+        System.out.print("\033[?25l");
+
         AtomicInteger direccion = new AtomicInteger(0);
 
         // El hilo de input:
@@ -106,7 +118,7 @@ public class Main {
                 cabeza[x][y] = m.verde;
             }
             // Morir antes de borrar, por bugs.
-            switch(direccion.get()){
+            switch (direccion.get()) {
                 case 0:
                     if (tablero[x][y + 1].equals(m.verde)) {
                         dead = false;
@@ -149,14 +161,32 @@ public class Main {
                     if (tablero[i][j].equals(m.verde)) {
                         tablero[i][j] = m.azul;
                     }
+                    if (tablero[i][j].equals(m.rojoClaro)) {
+                        tablero[i][j] = m.azul;
+                    }
                 }
             }
             // Crea los bordes.
             for (int i = 0; i < tablero.length; i++) {
                 for (int j = 0; j < tablero[i].length; j++) {
-                    if (i == 0 || i == tablero.length - 1 || j == 0 || j == tablero[i].length - 1) {
-                        tablero[i][j] = m.amarillo;
+                    if (!animacion2) {
+                        if (i == 0 || i == tablero.length - 1 || j == 0 || j == tablero[i].length - 1) {
+                            tablero[i][j] = m.amarillo;
+                        }
                     }
+                    if (animacion2) {
+                        if (i == 0 || i == tablero.length - 1 || j == 0 || j == tablero[i].length - 1) {
+                            tablero[i][j] = m.rojoClaro;
+                        }
+                        animacion2tick++;
+                    }
+                }
+            }
+            if (animacion2tick >= 2) {
+                animacion2tick++;
+                if (animacion2tick >= 3000) {
+                    animacion2 = false;
+                    animacion2tick = 0;
                 }
             }
             int x2 = x;
@@ -165,9 +195,9 @@ public class Main {
             boolean haycomida = false;
 
             ////////////////////////////////////////////////////////////////////////////
-            /// Podria ser mejor, podria usar una lista de pociciones de azul, y solo elegir 
-            // una de esas posiciones para poner la comida, asi cuando el tablero este 
-            // casi lleno no tendiran que pasar algunos ticks para que salga la comida, 
+            /// Podria ser mejor, podria usar una lista de pociciones de azul, y solo elegir
+            // una de esas posiciones para poner la comida, asi cuando el tablero este
+            // casi lleno no tendiran que pasar algunos ticks para que salga la comida,
             // por culpa de el Math random.
             //
 
@@ -186,6 +216,8 @@ public class Main {
                     n2 = (int) (Math.random() * j1);
                 }
                 tablero[n1][n2] = m.rojo;
+                x4 = n1;
+                y4 = n2;
             }
 
             // Aplico la direccion de el snake
@@ -200,6 +232,7 @@ public class Main {
                                     cuerpo.addFirst(new String[] { "D" });
 
                                     y += 1;
+                                    animacion = true;
                                 } else if (!tablero[i][j + 1].equals(m.rojo)) {
                                     cuerpo.removeLast();
                                     cuerpo.addFirst(new String[] { "D" });
@@ -219,6 +252,7 @@ public class Main {
                                     cuerpo.addFirst(new String[] { "S" });
 
                                     x += 1;
+                                    animacion = true;
                                 } else if (!tablero[i + 1][j].equals(m.rojo)) {
                                     cuerpo.removeLast();
                                     cuerpo.addFirst(new String[] { "S" });
@@ -238,6 +272,7 @@ public class Main {
                                     cuerpo.addFirst(new String[] { "A" });
 
                                     y -= 1;
+                                    animacion = true;
                                 } else if (!tablero[i][j - 1].equals(m.rojo)) {
                                     cuerpo.removeLast();
                                     cuerpo.addFirst(new String[] { "A" });
@@ -257,6 +292,7 @@ public class Main {
                                     cuerpo.addFirst(new String[] { "W" });
 
                                     x -= 1;
+                                    animacion = true;
                                 } else if (!tablero[i - 1][j].equals(m.rojo)) {
                                     cuerpo.removeLast();
                                     cuerpo.addFirst(new String[] { "W" });
@@ -307,6 +343,40 @@ public class Main {
                         break;
                 }
             }
+            // Animacion comer
+
+            if (animacion) {
+                try {
+                    if (!tablero[x4 - 1][y4].equals(m.verde)) {
+                        tablero[x4 - 1][y4] = m.rojoClaro;
+                    }
+                    if (!tablero[x4 + 1][y4].equals(m.verde)) {
+                        tablero[x4 + 1][y4] = m.rojoClaro;
+                    }
+                    if (!tablero[x4][y4 - 1].equals(m.verde)) {
+                        tablero[x4][y4 - 1] = m.rojoClaro;
+                    }
+                    if (!tablero[x4][y4 + 1].equals(m.verde)) {
+                        tablero[x4][y4 + 1] = m.rojoClaro;
+                    }
+                    if (!tablero[x4 - 3][y4].equals(m.verde)) {
+                        tablero[x4 - 3][y4] = m.rojoClaro;
+                    }
+                    if (!tablero[x4 + 3][y4].equals(m.verde)) {
+                        tablero[x4 + 3][y4] = m.rojoClaro;
+                    }
+                    if (!tablero[x4][y4 - 3].equals(m.verde)) {
+                        tablero[x4][y4 - 3] = m.rojoClaro;
+                    }
+                    if (!tablero[x4][y4 + 3].equals(m.verde)) {
+                        tablero[x4][y4 + 3] = m.rojoClaro;
+                    }
+                } catch (Exception e) {
+                    // TODO: handle exception
+                }
+                animacion = false;
+                animacion2 = true;
+            }
 
             // Imprimo el tablero
             for (int i = 0; i < tablero.length; i++) {
@@ -317,6 +387,8 @@ public class Main {
             }
             System.out.print("Segundos: " + tick + "\r\n");
             System.out.print("Comida: " + comidacomida + "\r\n");
+            System.out.println(x4 + "," + y4);
+            System.out.println("Animacion2Tick: " + animacion2tick + "\r\n");
 
             try {
                 Thread.sleep(159);
