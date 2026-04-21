@@ -99,11 +99,13 @@ public class Main {
         });
         inputThread.setDaemon(true);
         inputThread.start();
+        // limpio consola
+        System.out.print("\033[H\033[2J");
 
         while (tick < 10000000 && dead) {
 
-            // Limpio la consola
-            System.out.print("\033[H\033[2J");
+            // Reposiciono el cursor
+            System.out.println("\033[H");
             System.out.flush();
 
             tick++; // Aumento el tick
@@ -385,10 +387,9 @@ public class Main {
                 }
                 System.out.print("\r\n");
             }
-            System.out.print("Segundos: " + tick + "\r\n");
-            System.out.print("Comida: " + comidacomida + "\r\n");
-            System.out.println(x4 + "," + y4);
-            System.out.println("Animacion2Tick: " + animacion2tick + "\r\n");
+            int segundos = (int) (tick / 6.28);
+            System.out.print("Time: " + segundos + "\r\n");
+            System.out.print("Apples: " + comidacomida + "\r\n");
 
             try {
                 Thread.sleep(159);
